@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Duplicate Tab Manager</title>
+  <style>
+    /* Previous styles remain unchanged until .tab-item */
+    :root {
+      --primary-color: #3498db;
+      --danger-color: #e74c3c;
+      --background-color: #f8f9fa;
+      --border-color: #e1e4e8;
+      --text-color: #2c3e50;
+      --text-secondary: #6c757d;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --transition: all 0.2s ease;
+      --highlight-bg: #fff3cd;
+      --highlight-text: #856404;
+      --active-bg: #e8f5fe;
+      --active-border: #3498db;
+    }
+
+    /* Previous styles remain unchanged */
+    body {
+      width: 400px;
+      padding: 16px;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--background-color);
+      color: var(--text-color);
+    }
+
+    .settings {
+      background: white;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      padding: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .settings:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .setting-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .setting-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-color);
+      white-space: nowrap;
+    }
+
+    /* Switch styles */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cbd5e0;
+      transition: var(--transition);
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: var(--transition);
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--primary-color);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Color menu styles */
+    .color-menu {
+      position: relative;
+      display: inline-block;
+    }
+
+    .color-button {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid var(--border-color);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: #FF0000;
+    }
+
+    .color-button::after {
+      content: "▼";
+      font-size: 10px;
+      color: white;
+      text-shadow: 0 0 2px rgba(0,0,0,0.5);
+    }
+
+    .color-button:hover {
+      transform: scale(1.05);
+      border-color: var(--text-color);
+    }
+
+    .color-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 8px;
+      background: white;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      padding: 8px;
+      display: none;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      z-index: 1000;
+      min-width: 150px;
+    }
+
+    .color-menu.open .color-dropdown {
+      display: grid;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .color-option {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 2px solid var(--border-color);
+      position: relative;
+    }
+
+    .color-option:hover {
+      transform: scale(1.1);
+    }
+
+    .color-option.selected {
+      border-color: var(--text-color);
+    }
+
+    .color-option.selected::after {
+      content: "✓";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      text-shadow: 0 0 2px rgba(0,0,0,0.5);
+      font-size: 16px;
+    }
+
+    .custom-color {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .custom-color-picker {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 2px solid var(--border-color);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .custom-color-picker:hover {
+      transform: scale(1.1);
+    }
+
+    .custom-color-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .separator {
+      border: none;
+      height: 1px;
+      background: var(--border-color);
+      margin: 16px 0;
+    }
+
+    .duplicate-group {
+      margin-bottom: 16px;
+      background: white;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+
+    .duplicate-group:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Updated group URL styles */
+    .group-url {
+      background: var(--background-color);
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      word-break: break-all;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .url-item {
+      padding: 4px 0;
+    }
+
+    .url-item:not(:last-child) {
+      border-bottom: 1px dashed var(--border-color);
+    }
+
+    .url-highlight {
+      background: var(--highlight-bg);
+      color: var(--highlight-text);
+      padding: 0 4px;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+
+    /* Updated tab item styles */
+    .tab-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .tab-item:last-child {
+      border-bottom: none;
+    }
+
+    .tab-item:hover {
+      background: var(--background-color);
+    }
+
+    /* New active tab styles */
+    .tab-item.active {
+      background: var(--active-bg);
+      border-left: 4px solid var(--active-border);
+    }
+
+    .tab-item.active::after {
+      content: "Current";
+      position: absolute;
+      right: 64px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: var(--primary-color);
+      font-weight: 500;
+      background: var(--active-bg);
+      padding: 0 4px;
+      border-radius: 3px;
+    }
+
+    .clickable-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-grow: 1;
+      min-width: 0;
+      cursor: pointer;
+    }
+
+    .tab-favicon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      border-radius: 2px;
+    }
+
+    .tab-title {
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: 80px;
+      color: var(--text-color);
+    }
+
+    .close-button {
+      padding: 6px 12px;
+      background: var(--danger-color);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .close-button:hover {
+      transform: scale(1.05);
+      background: #c0392b;
+    }
+
+    .no-duplicates {
+      text-align: center;
+      color: var(--text-secondary);
+      padding: 32px 20px;
+      font-size: 14px;
+      background: white;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .duplicate-group {
+      animation: fadeIn 0.3s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <div class="settings">
+    <div class="setting-group">
+      <label class="setting-label">Show Dot</label>
+      <label class="switch">
+        <input type="checkbox" id="showDotToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="setting-group">
+      <label class="setting-label">Color</label>
+      <div class="color-menu">
+        <div class="color-button" id="colorButton"></div>
+        <div class="color-dropdown">
+          <div class="color-option selected" style="background: #FF0000" data-color="#FF0000"></div>
+          <div class="color-option" style="background: #FF5733" data-color="#FF5733"></div>
+          <div class="color-option" style="background: #FFC300" data-color="#FFC300"></div>
+          <div class="color-option" style="background: #27AE60" data-color="#27AE60"></div>
+          <div class="color-option" style="background: #2980B9" data-color="#2980B9"></div>
+          <div class="color-option" style="background: #8E44AD" data-color="#8E44AD"></div>
+          <div class="custom-color">
+            <input type="color" id="dotColor" class="custom-color-picker" value="#FF0000">
+            <span class="custom-color-label">Custom</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="setting-group">
+      <label class="setting-label">Strict Match</label>
+      <label class="switch">
+        <input type="checkbox" id="strictMatchToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+  <div class="separator"></div>
+  <div id="duplicateList">
+    <div class="no-duplicates">No duplicate tabs found</div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

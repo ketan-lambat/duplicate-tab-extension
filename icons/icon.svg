@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background tab -->
+    <rect x="30" y="40" width="70" height="60" rx="6" ry="6" 
+          fill="#4a90e2" opacity="0.8"/>
+    
+    <!-- Foreground tab -->
+    <rect x="50" y="25" width="70" height="60" rx="6" ry="6" 
+          fill="#4a90e2"/>
+    
+    <!-- Small lines in tabs to represent content -->
+    <rect x="60" y="40" width="40" height="4" rx="2" ry="2" 
+          fill="white"/>
+    <rect x="60" y="50" width="50" height="4" rx="2" ry="2" 
+          fill="white"/>
+    
+    <rect x="40" y="55" width="40" height="4" rx="2" ry="2" 
+          fill="white" opacity="0.8"/>
+    <rect x="40" y="65" width="50" height="4" rx="2" ry="2" 
+          fill="white" opacity="0.8"/>
+</svg>
