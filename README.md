@@ -3,6 +3,7 @@
 A browser extension for Microsoft Edge (and Chromium-based browsers) that detects duplicate tabs and helps you clean them up.
 
 ## Store Links
+Chrome Store: https://chromewebstore.google.com/detail/duplicate-tab-manager/fdflknjbngphmbmeeanpaapopfpcfkhn
 Edge Store: https://microsoftedge.microsoft.com/addons/detail/duplicate-tab-manager/gokgpbonigedidemnaildcnleigfpeep
 
 
